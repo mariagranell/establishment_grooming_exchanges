@@ -6,7 +6,7 @@ Various concepts have been developed to explain cooperation among unrelated indi
 
 This script processes the original focal data collected in the field (`Clean_focal.csv`) and extracts the relevant information for this study, creating `Focal_per_male_total.csv`. First, it filters the data for the males included in this study (see methods in the manuscript) and calculates the grooming duration of each interaction. Additionally, it defines the duration of a grooming bout.
 
-The script relies on Clean_focal.csv, which contains four years of focal data collection in the IVP. This dataset is not publicly available due to data sensitivity, but access may be granted upon request.
+The script relies on Clean_focal.csv, which contains two years of focal data collection in the IVP. This dataset is not publicly available due to data sensitivity, but access may be granted upon request.
 
 ## 1_Grooming_reciprocity_breakpoint
 
