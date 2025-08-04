@@ -48,12 +48,19 @@ data <- read.csv("/Users/mariagranell/Repositories/RTS/Publication/Rscripts/esta
 focal <- data %>%
   group_by(MaleID, FemaleID, Date, Day, Group, Status) %>%
   summarise(
+    # duration
     Duration_bgr = sum(Duration_bgr, na.rm = TRUE),
-    Duration_gr = sum(Duration_gr, na.rm = TRUE)
+    Duration_gr = sum(Duration_gr, na.rm = TRUE),
+    # frequency
+    n_female_grooms = sum(Duration_bgr > 0, na.rm = TRUE),
+    n_male_grooms   = sum(Duration_gr > 0, na.rm = TRUE),
   ) %>%
-  mutate(Reciprocity = (Duration_gr - Duration_bgr) / (Duration_gr + Duration_bgr),
+  mutate(
+    Reciprocity_dur = (Duration_gr - Duration_bgr) / (Duration_gr + Duration_bgr),
+    Reciprocity_freq = (n_male_grooms - n_female_grooms) /
+                            (n_male_grooms + n_female_grooms)
   ) %>%
-  dplyr::select(MaleID, FemaleID, Date, Day, Reciprocity, Group) %>%
+  dplyr::select(MaleID, FemaleID, Date, Day, Reciprocity_dur, Group, Reciprocity_freq) %>%
   mutate(month = month(Date),
          Season = case_when(
                 month < 4  ~ "Summer",  # Months 1, 2, 3 → Summer
@@ -64,11 +71,23 @@ focal <- data %>%
                          levels = c("Baby", "Summer", "Mating", "Winter"),
                          ordered = T))
 
+# visual inspections shows a change in grooming reciprocity
+ggplot(focal, aes(x = Day, y = Reciprocity_dur)) +
+  geom_point() +
+  geom_smooth(method = "loess")
+
+ggplot(focal, aes(x = Day, y = Reciprocity_freq)) +
+  geom_point() +
+  geom_smooth(method = "loess")
+
+# both types of measurning reciprocity are highly correlated, thus we will proceed with duration
+cor.test(~ Reciprocity_dur + Reciprocity_freq, data = focal, method = "pearson", use = "complete.obs") # cor 0.94
+
 ## breakpoint reciprocity ----
 # we converted the data into binomial, 1 or 0.
 reciprocity <- focal %>%
-  filter(Reciprocity != 0) %>%
-  mutate(Binom = ifelse(Reciprocity >= 0, 1, 0)) %>%
+  filter(Reciprocity_dur != 0) %>%
+  mutate(Binom = ifelse(Reciprocity_dur >= 0, 1, 0)) %>%
   filter(Day < 365)
 
 ggplot(reciprocity, aes(x = Day, y = Binom)) +
